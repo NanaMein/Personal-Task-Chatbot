@@ -74,3 +74,6 @@ yarn.lock
 # For example:
 # my_local_config.yaml
 # data/large_local_dataset/
+
+#personal files i dont like to add in git remote
+fionica.yaml
