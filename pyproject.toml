@@ -1,8 +1,9 @@
 [project]
 name = "agentic-personal-task"
 version = "0.1.0"
-description = "Add your description here"
-requires-python = ">=3.12"
+description = """Make an ai system that saves your schedule and is able to
+    automatically sends you email or in chat """
+requires-python = ">=3.11"
 dependencies = [
     "onnxruntime==1.22.0",
     "crewai==0.121.0",

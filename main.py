@@ -1,5 +1,5 @@
 import asyncio
-from Flow_Crew_AI.flow_main import flow_run
+from Agentic_Workflow.async_flow_v1 import personal_task_wrapper
 
 def run():
     # Create a single event loop for the entire session
@@ -14,7 +14,7 @@ def run():
                 break
 
             # Run async code in the existing loop
-            flow = loop.run_until_complete(flow_run(input_message))
+            flow = loop.run_until_complete(personal_task_wrapper(input_message=input_message))
             print(flow)
             print("\n" + "*" * 35 + " END " + "*" * 35 + "\n")
 
