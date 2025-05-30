@@ -1,9 +1,6 @@
 import os
 from dotenv import load_dotenv
-
-
 import asyncio
-
 from groq import AsyncGroq
 from groq.types.chat import (
     ChatCompletionSystemMessageParam,
@@ -11,65 +8,60 @@ from groq.types.chat import (
     ChatCompletionAssistantMessageParam
 )
 
-
-async def main():
-    client = AsyncGroq()
+async def intent_router_llm(user_input: str):
+    client = AsyncGroq(
+        api_key=os.getenv('NEW_API_KEY')
+    )
     system_param = ChatCompletionSystemMessageParam(
         role="system",
-        content=""" 
-            You are a virtual router machine. You decide which 
+        content="""
+            ### INTENTS: [general_chat], [note_taking], [set_reminder], [memory_context]
+            
+            ### INSTRUCTIONS: 
+            Based on the user input, you need to know the intents, and then answer
+            in one of these INTENTS as outputs.
+            
+            <Examples>
+            Use [general_chat] If User is asking for greetings, simple conversation, long and short 
+            story telling, question and answer, and general topics.
+            User input: Hello there! im david nice to meet you. What's up for lunch?
+            Expected output: [general chat]
+            
+            Use [note_taking] when user is asking about taking notes that user want you
+            to keep. Or saving certain information or details
+            User input: Take note that im a college student 
+            Expected output: [note_taking]
+            
+            Use [set_reminder] when user input is about to ask to save, retrieve, search, know, update
+            and mark finished those reminders.
+            User input: Remind me around 5 pm that i am going out
+            Expected output: [set_reminder]
+            
+            Use [memory_context] when user asks about certain past conversation, chat history, query
+            certain timeline.
+            User input: Do you remember or know my past conversation with you?
+            Expected output: [memory_context]
+            </Examples>
+            
+            ### Additional Note: 
+            If user input content is not under one of these intents or not safe, please reply
+            [not_safe] as output to ensure as a failsafe backup response.
             """
     )
+    user_param = ChatCompletionUserMessageParam(
+        role="user",
+        content=f"### User Input: [({user_input})]"
+    )
     chat_completion = await client.chat.completions.create(
-        #
-        # Required parameters
-        #
-        messages=[
-            # Set an optional system message. This sets the behavior of the
-            # assistant and can be used to provide specific instructions for
-            # how it should behave throughout the conversation.
-            {
-                "role": "system",
-                "content": "You are a helpful assistant."
-            },
-            # Set a user message for the assistant to respond to.
-            {
-                "role": "user",
-                "content": "Explain the importance of fast language models",
-            }
-        ],
-
-        # The language model which will generate the completion.
-        model="llama-3.3-70b-versatile",
-
-        #
-        # Optional parameters
-        #
-
-        # Controls randomness: lowering results in less random completions.
-        # As the temperature approaches zero, the model will become
-        # deterministic and repetitive.
-        temperature=0.5,
-
-        # The maximum number of tokens to generate. Requests can use up to
-        # 2048 tokens shared between prompt and completion.
-        max_completion_tokens=1024,
-
-        # Controls diversity via nucleus sampling: 0.5 means half of all
-        # likelihood-weighted options are considered.
-        top_p=1,
-
-        # A stop sequence is a predefined or user-specified text string that
-        # signals an AI to stop generating content, ensuring its responses
-        # remain focused and concise. Examples include punctuation marks and
-        # markers like "[end]".
+        messages=[system_param, user_param],
+        model="llama3-8b-8192",
+        temperature=.5,
+        top_p=.5,
         stop=None,
-
-        # If set, partial message deltas will be sent.
         stream=False,
     )
 
     # Print the completion returned by the LLM.
-    print(chat_completion.choices[0].message.content)
+    return chat_completion.choices[0].message.content
 
-asyncio.run(main())
+# asyncio.run(main())
