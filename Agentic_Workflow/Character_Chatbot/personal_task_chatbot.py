@@ -2,9 +2,9 @@ import asyncio
 
 # from Agentic_Workflow.Character_Chatbot.Memory_Context_Layer.memory_context_engine import indexed_query_engine
 from .Memory_Context_Layer.memory_context_engine import indexed_chat_context, indexed_query_engine
-from .Personality_Context_Layer.personality_rag_engine import query_engine_chat_async , compound_beta_async, router_llm_async
+from .Personality_Context_Layer.personality_rag_engine import query_engine_chat_async , compound_beta_async
 
-async def memory_query_engine(prompt: str, web_search: bool = False) -> str:
+async def memory_query_engine(prompt: str, web_search: bool = False, intents: str = "") -> str:
     """ Combination of Memory Layer and Personality Layer of Fionica and Chat Context"""
     prompt_template = f"""
         ### System: You are a Chat Context Storage and you are a collection of past conversations. 
@@ -40,16 +40,16 @@ async def memory_query_engine(prompt: str, web_search: bool = False) -> str:
         """
     if web_search:
         fionica_template_output = await compound_beta_async(fionica_template)
-        await indexed_chat_context(prompt, fionica_template_output)
+        await indexed_chat_context(prompt, fionica_template_output, intents)
         return fionica_template_output
 
 
     fionica_template_output = await query_engine_chat_async(fionica_template)
-    await indexed_chat_context(prompt, fionica_template_output)
+    await indexed_chat_context(prompt, fionica_template_output, intents)
     return fionica_template_output
     # return context_template
 
 
-async def fionica_virtual_assistant(input: str, web_search: bool = False) -> str:
-    obj = await memory_query_engine(input, web_search)
+async def fionica_virtual_assistant(input: str, web_search: bool = False, intents: str = "") -> str:
+    obj = await memory_query_engine(input, web_search, intents)
     return obj

@@ -105,13 +105,13 @@ def lazy_loader():
 print("lazy loader on the roll")
 lazy_vector = lazy_loader()
 
-async def indexed_chat_context(user_content:str , assistant_content:str):
+async def indexed_chat_context(user_content:str , assistant_content:str, intents:str):
     current_timestamp = datetime.now(ZoneInfo("Asia/Manila")).isoformat()
 
     documents_v1 = [
         Document(
             text=f"""
-                [Role: User\'s request
+                [Role: User\'s query
                 //
                 Content: {user_content}]
                 """,
@@ -121,8 +121,7 @@ async def indexed_chat_context(user_content:str , assistant_content:str):
                 "role" : "user",
                 "location" : "philippines",
                 "intent_tags":
-                    ["general_chat"],
-                "message_type": "chat",
+                    [intents]
             }
         ),
         Document(
@@ -136,9 +135,8 @@ async def indexed_chat_context(user_content:str , assistant_content:str):
                 "timestamp": current_timestamp,
                 "role": "assistant",
                 "location": "philippines",
-                "intent_tags":["general_chat"],
-                "message_type":
-                    "chat",
+                "intent_tags":
+                    [intents]
             }
         )
     ]
