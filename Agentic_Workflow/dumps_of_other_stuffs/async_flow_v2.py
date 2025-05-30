@@ -6,9 +6,9 @@ print("ASYNC FLOW LOADING")
 from crewai.flow import Flow, start, listen, router
 from pydantic import BaseModel
 from dotenv import load_dotenv
-
-from .Character_Chatbot.Personality_Context_Layer.personality_rag_engine import router_llm_async
-from .Character_Chatbot.personal_task_chatbot import fionica_virtual_assistant
+#
+# from .Character_Chatbot.Personality_Context_Layer.personality_rag_engine import router_llm_async
+# from .Character_Chatbot.personal_task_chatbot import fionica_virtual_assistant
 
 load_dotenv()
 
@@ -51,12 +51,10 @@ class PersonalTaskFlow(Flow[FlowState]):
 
     @listen("PRIMARY")
     async def choice_1(self):
-        primary = await fionica_virtual_assistant(self.state.input)
         return primary
 
     @listen("SECONDARY")
     async def choice_2(self):
-        secondary = await fionica_virtual_assistant(self.state.input, web_search=True)
         return secondary
 
     @listen("FINAL")
