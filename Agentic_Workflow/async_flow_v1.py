@@ -7,8 +7,9 @@ from crewai.flow import Flow, start, listen, router
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
-from .Character_Chatbot.Personality_Context_Layer.personality_rag_engine import router_llm_async
+# from .Character_Chatbot.Personality_Context_Layer.personality_rag_engine import router_llm_async
 from .Character_Chatbot.personal_task_chatbot import fionica_virtual_assistant
+from .Character_Chatbot.Router_Context_Layer.router_logic_engine import intent_router_llm
 
 load_dotenv()
 
@@ -16,7 +17,6 @@ class FlowState(BaseModel):
     input: str = ""
     router_choices: str = ""
     router_output: str = ""
-    history_context: str = ""
     fake_router_output: str=""
 
 
@@ -33,17 +33,21 @@ class PersonalTaskFlow(Flow[FlowState]):
 
     @listen(memory_context_flow)
     async def start_method(self):
-        router_llm = await router_llm_async(self.state.input)
+        router_llm = await intent_router_llm(self.state.input)
         self.state.router_output = router_llm.strip()
 
     @router(start_method)
     async def routing_llm(self):
         routing_obj = self.state.router_output
-        if routing_obj=='PRIMARY':
-            return "PRIMARY"
+        if routing_obj=='[general_chat]':
+            return "general_chat"
 
-        elif routing_obj=='SECONDARY':
-            return "SECONDARY"
+        elif routing_obj=='[note_taking]':
+            return "note_taking"
+        elif routing_obj=='[set_reminder]':
+            return "set_reminder"
+        elif routing_obj=='[memory_context]':
+            return "memory_context"
 
         else:
             return "FINAL"
@@ -52,12 +56,21 @@ class PersonalTaskFlow(Flow[FlowState]):
     @listen("PRIMARY")
     async def choice_1(self):
         primary = await fionica_virtual_assistant(self.state.input)
-        return primary
+
+        return f"""
+        User Input: {self.state.input}\n
+        Assistant Output: {primary}\n
+        Test router intent: {self.state.fake_router_output}
+        """
 
     @listen("SECONDARY")
     async def choice_2(self):
         secondary = await fionica_virtual_assistant(self.state.input, web_search=True)
-        return secondary
+        return f"""
+               User Input: {self.state.input}\n
+               Assistant Output: {secondary}\n
+               Test router intent: {self.state.fake_router_output}
+               """
 
     @listen("FINAL")
     async def choice_3(self):
